@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>PPL Workout Builder</title>
+<style>
+:root {
+  --bg: #0f0f13;
+  --bg2: #1a1a24;
+  --bg3: #22222e;
+  --card: #1e1e2a;
+  --card-hover: #252536;
+  --border: #2a2a3a;
+  --text: #e8e8f0;
+  --text2: #9898b0;
+  --text3: #686880;
+  --accent: #6c5ce7;
+  --accent2: #a29bfe;
+  --push: #fd7272;
+  --push-bg: rgba(253,114,114,0.08);
+  --push-border: rgba(253,114,114,0.2);
+  --pull: #55efc4;
+  --pull-bg: rgba(85,239,196,0.08);
+  --pull-border: rgba(85,239,196,0.2);
+  --legs: #fdcb6e;
+  --legs-bg: rgba(253,203,110,0.08);
+  --legs-border: rgba(253,203,110,0.2);
+  --danger: #ff6b6b;
+  --success: #51cf66;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+.light {
+  --bg: #f5f5fa;
+  --bg2: #ffffff;
+  --bg3: #eeeef4;
+  --card: #ffffff;
+  --card-hover: #f8f8fc;
+  --border: #e0e0ea;
+  --text: #1a1a2e;
+  --text2: #5a5a72;
+  --text3: #9898a8;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { height: 100%; }
+body {
+  font-family: -apple-system, 'SF Pro Display', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Header */
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px 0;
+}
+.header-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; color: white;
+}
+.logo-text { font-size: 18px; font-weight: 700; }
+.logo-sub { font-size: 11px; color: var(--text3); font-weight: 500; }
+.header-actions { display: flex; gap: 8px; }
+.btn-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  transition: all 0.2s;
+}
+.btn-icon:hover { background: var(--bg3); color: var(--text); }
+
+/* Tabs */
+.tabs-wrapper {
+  display: flex; gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 0;
+}
+.tabs-wrapper::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.tab-btn:hover { color: var(--text2); }
+.tab-btn.active { color: var(--text); }
+.tab-btn.active[data-type="legs"] { border-bottom-color: var(--legs); }
+.tab-btn.active[data-type="push"] { border-bottom-color: var(--push); }
+.tab-btn.active[data-type="pull"] { border-bottom-color: var(--pull); }
+
+.day-badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+.day-badge.legs { background: var(--legs-bg); color: var(--legs); }
+.day-badge.push { background: var(--push-bg); color: var(--push); }
+.day-badge.pull { background: var(--pull-bg); color: var(--pull); }
+
+/* Main */
+.main { padding: 16px; max-width: 640px; margin: 0 auto; }
+
+/* Day header */
+.day-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.day-title { font-size: 22px; font-weight: 800; }
+.day-stats {
+  display: flex; gap: 12px; font-size: 12px; color: var(--text3);
+}
+.day-stats span { display: flex; align-items: center; gap: 4px; }
+
+/* Exercise Card */
+.exercise-list { display: flex; flex-direction: column; gap: 8px; }
+
+.exercise-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all 0.2s;
+  position: relative;
+}
+.exercise-card:hover { background: var(--card-hover); }
+.exercise-card.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+.exercise-card.drag-over {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.card-main {
+  display: flex; align-items: stretch;
+  min-height: 72px;
+}
+
+.drag-handle {
+  width: 36px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab; color: var(--text3);
+  font-size: 14px; letter-spacing: 1px;
+  transition: color 0.2s;
+  user-select: none;
+  touch-action: none;
+}
+.drag-handle:hover { color: var(--text2); }
+.drag-handle:active { cursor: grabbing; }
+
+.card-color-bar {
+  width: 3px; flex-shrink: 0;
+  border-radius: 2px;
+  margin: 8px 0;
+}
+.card-color-bar.push { background: var(--push); }
+.card-color-bar.pull { background: var(--pull); }
+.card-color-bar.legs { background: var(--legs); }
+
+.card-content {
+  flex: 1; padding: 10px 12px;
+  display: flex; flex-direction: column; justify-content: center;
+  min-width: 0;
+}
+.card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 8px;
+}
+.exercise-name {
+  font-size: 14px; font-weight: 700;
+  line-height: 1.3;
+  cursor: text;
+  border-radius: 4px; padding: 1px 4px; margin: -1px -4px;
+  transition: background 0.2s;
+  word-break: break-word;
+}
+.exercise-name:hover { background: var(--bg3); }
+.exercise-name:focus {
+  outline: none;
+  background: var(--bg3);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.exercise-order {
+  font-size: 11px; color: var(--text3);
+  font-weight: 700;
+  min-width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--bg3);
+  flex-shrink: 0;
+}
+
+.card-details {
+  display: flex; gap: 10px; margin-top: 6px;
+  flex-wrap: wrap; align-items: center;
+}
+.detail-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--text2);
+  background: var(--bg2);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.detail-chip .label { color: var(--text3); font-size: 10px; text-transform: uppercase; font-weight: 600; }
+.detail-chip .value {
+  font-weight: 700; cursor: text;
+  border-radius: 3px; padding: 0 2px;
+  transition: background 0.2s;
+}
+.detail-chip .value:hover { background: var(--bg3); }
+.detail-chip .value:focus {
+  outline: none; background: var(--bg3);
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+
+.note-tag {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: text;
+}
+.note-tag:focus {
+  outline: none;
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+.note-tag.push { background: var(--push-bg); color: var(--push); border: 1px solid var(--push-border); }
+.note-tag.pull { background: var(--pull-bg); color: var(--pull); border: 1px solid var(--pull-border); }
+.note-tag.legs { background: var(--legs-bg); color: var(--legs); border: 1px solid var(--legs-border); }
+
+.muscle-tags { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+.muscle-tag {
+  font-size: 10px; color: var(--text3);
+  padding: 1px 6px; border-radius: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px;
+}
+
+/* Card actions */
+.card-actions {
+  display: flex; flex-direction: column;
+  justify-content: center; gap: 2px;
+  padding: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.exercise-card:hover .card-actions { opacity: 1; }
+
+.btn-card-action {
+  width: 28px; height: 28px;
+  border: none; border-radius: 6px;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.btn-card-action:hover { background: var(--bg3); color: var(--text); }
+.btn-card-action.delete:hover { background: rgba(255,107,107,0.15); color: var(--danger); }
+
+/* Add exercise */
+.add-exercise-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text3);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.add-exercise-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(108,92,231,0.05);
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg2);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.modal h3 { font-size: 18px; margin-bottom: 16px; }
+.modal-field { margin-bottom: 14px; }
+.modal-field label {
+  display: block; font-size: 12px;
+  color: var(--text3); margin-bottom: 5px;
+  font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.modal-field input, .modal-field select, .modal-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
+  border-color: var(--accent);
+}
+.modal-field textarea { resize: vertical; min-height: 60px; }
+.modal-actions {
+  display: flex; gap: 8px; margin-top: 16px;
+}
+.btn-modal {
+  flex: 1; padding: 12px;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-modal.primary {
+  background: var(--accent);
+  color: white;
+}
+.btn-modal.primary:hover { background: var(--accent2); }
+.btn-modal.secondary {
+  background: var(--bg3);
+  color: var(--text2);
+}
+.btn-modal.secondary:hover { background: var(--border); color: var(--text); }
+
+/* Share toast */
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--success);
+  color: #000;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 13px;
+  z-index: 300;
+  transition: transform 0.3s ease;
+  box-shadow: var(--shadow);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Footer */
+.app-footer {
+  text-align: center;
+  padding: 24px 16px 40px;
+  color: var(--text3);
+  font-size: 11px;
+}
+.app-footer a { color: var(--accent2); text-decoration: none; }
+
+/* Summary section */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.summary-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+}
+.summary-card .val { font-size: 20px; font-weight: 800; }
+.summary-card .lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; font-weight: 600; margin-top: 2px; }
+
+/* Responsive adjustments */
+@media (min-width: 640px) {
+  .modal { border-radius: 20px; margin-bottom: 20px; }
+  .card-actions { opacity: 0.3; }
+  .exercise-card:hover .card-actions { opacity: 1; }
+}
+@media (max-width: 400px) {
+  .tab-btn { padding: 8px 10px; font-size: 12px; }
+  .exercise-name { font-size: 13px; }
+}
+
+/* Drag and Drop Touch Support */
+.exercise-card.touch-dragging {
+  position: fixed;
+  z-index: 150;
+  pointer-events: none;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  transform: scale(1.03);
+  opacity: 0.92;
+  width: calc(100% - 32px);
+  max-width: 608px;
+}
+.exercise-card.placeholder {
+  opacity: 0.3;
+  border: 2px dashed var(--accent);
+  background: transparent;
+}
+
+/* Print */
+@media print {
+  .app-header, .header-actions, .card-actions, .add-exercise-btn, .drag-handle { display: none !important; }
+  .exercise-card { break-inside: avoid; }
+  body { background: white; color: black; }
+  .exercise-card { border: 1px solid #ccc; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">N</div>
+      <div>
+        <div class="logo-text">PPL Builder</div>
+        <div class="logo-sub">Jeff Nippard - Smartest PPL</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="toggleTheme()" title="Tema">
+        <span id="themeIcon">&#9728;</span>
+      </button>
+      <button class="btn-icon" onclick="resetWorkout()" title="Resetar">&#8635;</button>
+      <button class="btn-icon" onclick="shareWorkout()" title="Compartilhar" style="background:var(--accent);color:white;border-color:var(--accent);">
+        &#10138;
+      </button>
+    </div>
+  </div>
+  <div class="tabs-wrapper" id="tabs"></div>
+</div>
+
+<div class="main" id="main"></div>
+
+<div class="app-footer">
+  Baseado no video <a href="https://www.youtube.com/watch?v=qVek72z3F1U" target="_blank">The Smartest Push Pull Legs Routine</a> por Jeff Nippard
+  <br>Edite, reordene e compartilhe seu treino
+</div>
+
+<!-- Add Exercise Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Adicionar Exercicio</h3>
+    <div class="modal-field">
+      <label>Nome do Exercicio</label>
+      <input type="text" id="newName" placeholder="Ex: Bench Press">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="modal-field">
+        <label>Series</label>
+        <input type="text" id="newSets" placeholder="3">
+      </div>
+      <div class="modal-field">
+        <label>Reps</label>
+        <input type="text" id="newReps" placeholder="10-12">
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Nota / Tecnica (opcional)</label>
+      <input type="text" id="newNote" placeholder="Ex: Drop set no ultimo set">
+    </div>
+    <div class="modal-field">
+      <label>Musculos (opcional, separados por virgula)</label>
+      <input type="text" id="newMuscles" placeholder="Ex: Peito, Triceps">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal secondary" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn-modal primary" onclick="confirmAddExercise()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA MODEL
+// Reflexao: Organizei os dados como array de dias, cada dia com
+// tipo (push/pull/legs), nome, e array de exercicios. Cada
+// exercicio tem id unico para facilitar drag-and-drop e edicao.
+// Incluí muscles para quem quer entender quais grupos sao
+// trabalhados - algo que apps como Hevy fazem muito bem.
+// ============================================================
+
+const DEFAULT_DATA = [
+  {
+    id: 'legs1', name: 'Legs 1', type: 'legs', subtitle: 'Enfase em Agachamento',
+    exercises: [
+      { id:'l1e1', name:'Squat (Agachamento)', sets:'3', reps:'4', note:'80% 1RM', muscles:['Quadriceps','Gluteos','Core'] },
+      { id:'l1e2', name:'Romanian Deadlift', sets:'3', reps:'10', note:'', muscles:['Posteriores','Gluteos','Lombar'] },
+      { id:'l1e3', name:'Single Leg Press', sets:'3', reps:'15', note:'Unilateral', muscles:['Quadriceps','Gluteos'] },
+      { id:'l1e4', name:'Eccentric Leg Extension', sets:'3', reps:'10-12', note:'Fase excentrica lenta', muscles:['Quadriceps'] },
+      { id:'l1e5', name:'Seated Leg Curls', sets:'3', reps:'10-12', note:'', muscles:['Posteriores'] },
+      { id:'l1e6', name:'Standing Calf Raise', sets:'3', reps:'10-12', note:'', muscles:['Panturrilha'] },
+      { id:'l1e7', name:'Decline Crunches', sets:'2', reps:'10-12', note:'SUPERSET com Planks', muscles:['Abdomen'] },
+      { id:'l1e8', name:'Long-Lever Planks', sets:'2', reps:'30s', note:'SUPERSET com Crunches', muscles:['Core','Abdomen'] }
+    ]
+  },
+  {
+    id: 'push1', name: 'Push 1', type: 'push', subtitle: 'Enfase em Supino',
+    exercises: [
+      { id:'p1e1', name:'Bench Press (Supino)', sets:'3', reps:'8', note:'72.5% 1RM', muscles:['Peito','Triceps','Deltoides Anterior'] },
+      { id:'p1e2', name:'Machine Shoulder Press', sets:'3', reps:'12', note:'', muscles:['Deltoides','Triceps'] },
+      { id:'p1e3', name:'Dips (Paralelas)', sets:'3', reps:'12-15', note:'', muscles:['Peito','Triceps','Deltoides'] },
+      { id:'p1e4', name:'Eccentric Skullcrushers', sets:'3', reps:'8-10', note:'Fase excentrica lenta', muscles:['Triceps'] },
+      { id:'p1e5', name:'Egyptian Lateral Raise', sets:'3', reps:'12+MYO', note:'Myoreps no ultimo set', muscles:['Deltoides Lateral'] },
+      { id:'p1e6', name:'Cable Tricep Kickback', sets:'3', reps:'20-30', note:'Reps altas', muscles:['Triceps'] }
+    ]
+  },
+  {
+    id: 'pull1', name: 'Pull 1', type: 'pull', subtitle: 'Enfase em Pull-Up',
+    exercises: [
+      { id:'r1e1', name:'Weighted Pull-Up', sets:'3', reps:'6', note:'Com carga', muscles:['Dorsais','Biceps','Romboides'] },
+      { id:'r1e2', name:'Seated Cable Row', sets:'3', reps:'10-12', note:'', muscles:['Dorsais','Romboides','Trapezio'] },
+      { id:'r1e3', name:'Cable Pullover', sets:'3', reps:'15-20', note:'', muscles:['Dorsais','Serratio'] },
+      { id:'r1e4', name:'Hammer Cheat Curl', sets:'3', reps:'8-10', note:'Cheat controlado', muscles:['Biceps','Braquial'] },
+      { id:'r1e5', name:'Incline Dumbbell Curl', sets:'2', reps:'12-15', note:'', muscles:['Biceps'] }
+    ]
+  },
+  {
+    id: 'legs2', name: 'Legs 2', type: 'legs', subtitle: 'Enfase em Deadlift',
+    exercises: [
+      { id:'l2e1', name:'Deadlift (Levantamento Terra)', sets:'3', reps:'3', note:'80-85% 1RM', muscles:['Posteriores','Gluteos','Lombar','Core'] },
+      { id:'l2e2', name:'Hack Squat', sets:'3', reps:'10-12', note:'', muscles:['Quadriceps','Gluteos'] },
+      { id:'l2e3', name:'Single-Leg Hip Thrust', sets:'2', reps:'15', note:'Unilateral', muscles:['Gluteos'] },
+      { id:'l2e4', name:'Nordic Ham Curl', sets:'2', reps:'10-12', note:'SUPERSET com Back Ext', muscles:['Posteriores'] },
+      { id:'l2e5', name:'Prisoner Back Extension', sets:'2', reps:'10-12', note:'SUPERSET com Nordic', muscles:['Lombar','Gluteos'] },
+      { id:'l2e6', name:'Single-Leg Calf Raise', sets:'3', reps:'8-10', note:'Unilateral', muscles:['Panturrilha'] },
+      { id:'l2e7', name:'Weighted L-Sit Hold', sets:'3', reps:'max hold', note:'', muscles:['Abdomen','Core','Hip Flexors'] }
+    ]
+  },
+  {
+    id: 'push2', name: 'Push 2', type: 'push', subtitle: 'Enfase em Overhead Press',
+    exercises: [
+      { id:'p2e1', name:'Overhead Press (Desenvolvimento)', sets:'4', reps:'4', note:'80% 1RM', muscles:['Deltoides','Triceps','Core'] },
+      { id:'p2e2', name:'Close-Grip Bench Press', sets:'3', reps:'10', note:'Pegada fechada', muscles:['Triceps','Peito'] },
+      { id:'p2e3', name:'Cable Crossover', sets:'3', reps:'10-12', note:'Drop set no ultimo set (-50%)', muscles:['Peito'] },
+      { id:'p2e4', name:'Overhead Tricep Extension', sets:'3', reps:'10-12', note:'', muscles:['Triceps Cabeca Longa'] },
+      { id:'p2e5', name:'Lateral Raise 21s', sets:'3', reps:'7/7/7', note:'7 full + 7 top + 7 bottom', muscles:['Deltoides Lateral'] },
+      { id:'p2e6', name:'Neck Flexion/Extension', sets:'3', reps:'10-12', note:'Flexao + Extensao', muscles:['Pescoco'] }
+    ]
+  },
+  {
+    id: 'pull2', name: 'Pull 2', type: 'pull', subtitle: 'Enfase em Lat Pulldown',
+    exercises: [
+      { id:'r2e1', name:'Omni-Grip Lat Pulldown', sets:'3', reps:'10-12', note:'Set 1: wide / Set 2: close / Set 3: supinada', muscles:['Dorsais','Biceps'] },
+      { id:'r2e2', name:'Chest-Supported Row', sets:'3', reps:'10-12', note:'', muscles:['Romboides','Trapezio','Dorsais'] },
+      { id:'r2e3', name:'Rope Facepull', sets:'3', reps:'15-20', note:'', muscles:['Deltoides Posterior','Romboides'] },
+      { id:'r2e4', name:'Incline Dumbbell Shrug', sets:'3', reps:'15-20', note:'Opcional', muscles:['Trapezio'] },
+      { id:'r2e5', name:'Reverse Pec Deck', sets:'2', reps:'15+10-15', note:'Reps extras apos pausa', muscles:['Deltoides Posterior'] },
+      { id:'r2e6', name:'Pronated/Supinated Curl', sets:'3', reps:'10/10', note:'10 pronada + 10 supinada', muscles:['Biceps','Braquioradial'] }
+    ]
+  }
+];
+
+// ============================================================
+// STATE MANAGEMENT
+// Reflexao: Uso localStorage para persistir mudancas do usuario.
+// O estado da URL (hash) permite compartilhar. Se existe hash,
+// ele tem prioridade sobre localStorage, permitindo que o link
+// compartilhado carregue o treino de quem enviou.
+// ============================================================
+
+let workoutData = [];
+let activeDay = 0;
+let dragSrcIndex = null;
+let touchDragEl = null;
+let touchDragIndex = null;
+let touchPlaceholder = null;
+
+function init() {
+  // Prioridade: URL hash > localStorage > default
+  const hash = window.location.hash.slice(1);
+  if (hash) {
+    try {
+      workoutData = JSON.parse(decodeURIComponent(atob(hash)));
+    } catch(e) {
+      workoutData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+  } else {
+    const saved = localStorage.getItem('nippard-ppl');
+    if (saved) {
+      try { workoutData = JSON.parse(saved); }
+      catch(e) { workoutData = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+    } else {
+      workoutData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+  }
+  // Load theme
+  if (localStorage.getItem('ppl-theme') === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('themeIcon').innerHTML = '&#9790;';
+  }
+  renderTabs();
+  renderDay();
+}
+
+function save() {
+  localStorage.setItem('nippard-ppl', JSON.stringify(workoutData));
+}
+
+// ============================================================
+// RENDER
+// Reflexao: Optei por re-render completo ao inves de DOM
+// diffing por simplicidade. Para 6-8 exercicios por dia,
+// a performance e excelente. Cada card tem drag handle,
+// chips editaveis, e acoes contextuais.
+// ============================================================
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = workoutData.map((day, i) => {
+    const dayNum = i + 1;
+    return `<button class="tab-btn ${i === activeDay ? 'active' : ''}"
+              data-type="${day.type}"
+              onclick="switchDay(${i})">
+              Dia ${dayNum}
+              <span class="day-badge ${day.type}">${day.type.toUpperCase()}</span>
+            </button>`;
+  }).join('');
+}
+
+function renderDay() {
+  const day = workoutData[activeDay];
+  if (!day) return;
+  const totalSets = day.exercises.reduce((sum, ex) => sum + parseInt(ex.sets) || 0, 0);
+  const totalEx = day.exercises.length;
+
+  let html = `
+    <div class="day-header">
+      <div>
+        <div class="day-title">${day.name}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">${day.subtitle || ''}</div>
+      </div>
+      <div class="day-stats">
+        <span>${totalEx} exercicios</span>
+        <span>${totalSets} series</span>
+      </div>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="val" style="color:var(--${day.type})">${totalEx}</div>
+        <div class="lbl">Exercicios</div>
+      </div>
+      <div class="summary-card">
+        <div class="val">${totalSets}</div>
+        <div class="lbl">Series Total</div>
+      </div>
+      <div class="summary-card">
+        <div class="val">~${Math.round(totalSets * 2.5)}'</div>
+        <div class="lbl">Tempo Est.</div>
+      </div>
+    </div>
+    <div class="exercise-list" id="exerciseList">
+  `;
+
+  day.exercises.forEach((ex, i) => {
+    const noteHtml = ex.note
+      ? `<span class="note-tag ${day.type}" contenteditable="true"
+              onblur="updateNote(${i}, this.textContent)">${ex.note}</span>`
+      : '';
+
+    const muscleHtml = (ex.muscles && ex.muscles.length)
+      ? `<div class="muscle-tags">${ex.muscles.map(m =>
+          `<span class="muscle-tag">${m}</span>`).join('')}</div>`
+      : '';
+
+    html += `
+      <div class="exercise-card" draggable="true"
+           ondragstart="onDragStart(event,${i})"
+           ondragover="onDragOver(event,${i})"
+           ondragleave="onDragLeave(event)"
+           ondrop="onDrop(event,${i})"
+           ondragend="onDragEnd(event)"
+           data-index="${i}">
+        <div class="card-main">
+          <div class="drag-handle"
+               ontouchstart="onTouchStart(event,${i})"
+               ontouchmove="onTouchMove(event)"
+               ontouchend="onTouchEnd(event)">&#9776;</div>
+          <div class="card-color-bar ${day.type}"></div>
+          <div class="card-content">
+            <div class="card-top">
+              <span class="exercise-name" contenteditable="true"
+                    onblur="updateName(${i}, this.textContent)">${ex.name}</span>
+              <span class="exercise-order">${i + 1}</span>
+            </div>
+            <div class="card-details">
+              <div class="detail-chip">
+                <span class="label">Sets</span>
+                <span class="value" contenteditable="true"
+                      onblur="updateSets(${i}, this.textContent)">${ex.sets}</span>
+              </div>
+              <div class="detail-chip">
+                <span class="label">Reps</span>
+                <span class="value" contenteditable="true"
+                      onblur="updateReps(${i}, this.textContent)">${ex.reps}</span>
+              </div>
+              ${noteHtml}
+            </div>
+            ${muscleHtml}
+          </div>
+          <div class="card-actions">
+            <button class="btn-card-action" onclick="duplicateExercise(${i})" title="Duplicar">&#10697;</button>
+            <button class="btn-card-action" onclick="addNote(${i})" title="Nota">${ex.note ? '&#9998;' : '&#128172;'}</button>
+            <button class="btn-card-action delete" onclick="deleteExercise(${i})" title="Remover">&#10005;</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+    </div>
+    <button class="add-exercise-btn" onclick="openAddModal()">
+      + Adicionar Exercicio
+    </button>
+  `;
+
+  document.getElementById('main').innerHTML = html;
+}
+
+function switchDay(i) {
+  activeDay = i;
+  renderTabs();
+  renderDay();
+}
+
+// ============================================================
+// INLINE EDITING
+// Reflexao: contenteditable permite edicao direta sem modais.
+// Isto imita o comportamento de apps como Notion e Hevy,
+// onde o usuario clica e edita sem fricao. Cada campo
+// salva automaticamente ao perder foco (onblur).
+// ============================================================
+
+function updateName(i, val) {
+  workoutData[activeDay].exercises[i].name = val.trim();
+  save();
+}
+function updateSets(i, val) {
+  workoutData[activeDay].exercises[i].sets = val.trim();
+  save(); renderDay();
+}
+function updateReps(i, val) {
+  workoutData[activeDay].exercises[i].reps = val.trim();
+  save();
+}
+function updateNote(i, val) {
+  workoutData[activeDay].exercises[i].note = val.trim();
+  save();
+}
+
+// ============================================================
+// DRAG & DROP (Desktop)
+// Reflexao: Drag-and-drop e a forma mais intuitiva de
+// reordenar exercicios. Praticantes de musculacao frequentemente
+// mudam a ordem para otimizar pre-fadiga ou pares antagonistas.
+// A API HTML5 Drag funciona bem em desktop.
+// ============================================================
+
+function onDragStart(e, i) {
+  dragSrcIndex = i;
+  e.target.closest('.exercise-card').classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragOver(e, i) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const card = e.target.closest('.exercise-card');
+  document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('drag-over'));
+  if (card && i !== dragSrcIndex) card.classList.add('drag-over');
+}
+function onDragLeave(e) {
+  const card = e.target.closest('.exercise-card');
+  if (card) card.classList.remove('drag-over');
+}
+function onDrop(e, i) {
+  e.preventDefault();
+  if (dragSrcIndex === null || dragSrcIndex === i) return;
+  const exercises = workoutData[activeDay].exercises;
+  const moved = exercises.splice(dragSrcIndex, 1)[0];
+  exercises.splice(i, 0, moved);
+  save();
+  renderDay();
+}
+function onDragEnd(e) {
+  dragSrcIndex = null;
+  document.querySelectorAll('.exercise-card').forEach(c => {
+    c.classList.remove('dragging', 'drag-over');
+  });
+}
+
+// ============================================================
+// DRAG & DROP (Touch / Mobile)
+// Reflexao: A maioria dos praticantes amadores usa o celular
+// na academia. Touch drag precisa de implementacao separada
+// porque a API HTML5 Drag nao funciona em touch. Criei um
+// sistema visual onde o card "flutua" com o dedo.
+// ============================================================
+
+function onTouchStart(e, i) {
+  if (e.touches.length !== 1) return;
+  touchDragIndex = i;
+  const card = e.target.closest('.exercise-card');
+  const rect = card.getBoundingClientRect();
+
+  // Create floating clone
+  touchDragEl = card.cloneNode(true);
+  touchDragEl.classList.add('touch-dragging');
+  touchDragEl.style.width = rect.width + 'px';
+  touchDragEl.style.left = rect.left + 'px';
+  touchDragEl.style.top = rect.top + 'px';
+  document.body.appendChild(touchDragEl);
+
+  // Mark original as placeholder
+  card.classList.add('placeholder');
+  touchPlaceholder = card;
+}
+
+function onTouchMove(e) {
+  if (touchDragEl === null) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  touchDragEl.style.top = (touch.clientY - 36) + 'px';
+
+  // Find target card
+  const cards = document.querySelectorAll('.exercise-card:not(.touch-dragging):not(.placeholder)');
+  cards.forEach(c => c.classList.remove('drag-over'));
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (target) {
+    const card = target.closest('.exercise-card');
+    if (card && !card.classList.contains('placeholder') && !card.classList.contains('touch-dragging')) {
+      card.classList.add('drag-over');
+    }
+  }
+}
+
+function onTouchEnd(e) {
+  if (touchDragEl === null || touchDragIndex === null) return;
+
+  // Find drop target
+  const overCard = document.querySelector('.exercise-card.drag-over');
+  if (overCard) {
+    const targetIndex = parseInt(overCard.dataset.index);
+    if (targetIndex !== touchDragIndex) {
+      const exercises = workoutData[activeDay].exercises;
+      const moved = exercises.splice(touchDragIndex, 1)[0];
+      exercises.splice(targetIndex, 0, moved);
+      save();
+    }
+  }
+
+  // Cleanup
+  if (touchDragEl && touchDragEl.parentNode) touchDragEl.parentNode.removeChild(touchDragEl);
+  if (touchPlaceholder) touchPlaceholder.classList.remove('placeholder');
+  touchDragEl = null; touchDragIndex = null; touchPlaceholder = null;
+  document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('drag-over'));
+  renderDay();
+}
+
+// ============================================================
+// EXERCISE CRUD
+// Reflexao: Permiti adicionar, duplicar e remover exercicios
+// porque praticantes amadores precisam adaptar o treino a
+// seu nivel e equipamento disponivel. Nem toda academia
+// tem Hack Squat ou Pec Deck, entao substituicoes sao
+// essenciais. Duplicar facilita criar variacoes.
+// ============================================================
+
+function openAddModal() {
+  document.getElementById('addModal').classList.add('open');
+  document.getElementById('newName').focus();
+}
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+  document.getElementById('newName').value = '';
+  document.getElementById('newSets').value = '';
+  document.getElementById('newReps').value = '';
+  document.getElementById('newNote').value = '';
+  document.getElementById('newMuscles').value = '';
+}
+function confirmAddExercise() {
+  const name = document.getElementById('newName').value.trim();
+  if (!name) return;
+  const sets = document.getElementById('newSets').value.trim() || '3';
+  const reps = document.getElementById('newReps').value.trim() || '10';
+  const note = document.getElementById('newNote').value.trim();
+  const musclesRaw = document.getElementById('newMuscles').value.trim();
+  const muscles = musclesRaw ? musclesRaw.split(',').map(m => m.trim()).filter(Boolean) : [];
+
+  workoutData[activeDay].exercises.push({
+    id: 'custom_' + Date.now(),
+    name, sets, reps, note, muscles
+  });
+  save();
+  closeAddModal();
+  renderDay();
+  // Scroll to bottom
+  setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+}
+
+function deleteExercise(i) {
+  const name = workoutData[activeDay].exercises[i].name;
+  if (confirm(`Remover "${name}"?`)) {
+    workoutData[activeDay].exercises.splice(i, 1);
+    save();
+    renderDay();
+  }
+}
+
+function duplicateExercise(i) {
+  const ex = workoutData[activeDay].exercises[i];
+  const clone = { ...ex, id: 'dup_' + Date.now(), name: ex.name + ' (copia)', muscles: [...(ex.muscles || [])] };
+  workoutData[activeDay].exercises.splice(i + 1, 0, clone);
+  save();
+  renderDay();
+}
+
+function addNote(i) {
+  const current = workoutData[activeDay].exercises[i].note || '';
+  const note = prompt('Nota / Tecnica:', current);
+  if (note !== null) {
+    workoutData[activeDay].exercises[i].note = note;
+    save();
+    renderDay();
+  }
+}
+
+// ============================================================
+// SHARE
+// Reflexao: Compartilhamento e crucial para treinos em grupo
+// ou quando um amigo mais experiente monta o treino para
+// outro. Codificar em base64 no hash da URL permite que
+// o HTML funcione como "app" sem servidor. Quem recebe o
+// link ve o treino exatamente como foi configurado.
+// ============================================================
+
+function shareWorkout() {
+  try {
+    const encoded = btoa(encodeURIComponent(JSON.stringify(workoutData)));
+    const url = window.location.origin + window.location.pathname + '#' + encoded;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url).then(() => showToast('Link copiado!'));
+    } else {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Link copiado!');
+    }
+  } catch(e) {
+    showToast('Erro ao copiar');
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// THEME
+// Reflexao: Oferecer dark/light mode porque praticantes
+// usam o app em contextos diferentes: na academia (escuro
+// pra nao incomodar), em casa planejando (claro pra leitura).
+// Dark mode como padrao porque a maioria dos apps fitness
+// modernos (Hevy, Strong, Boostcamp) usa dark.
+// ============================================================
+
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  document.getElementById('themeIcon').innerHTML = isLight ? '&#9790;' : '&#9728;';
+  localStorage.setItem('ppl-theme', isLight ? 'light' : 'dark');
+}
+
+// ============================================================
+// RESET
+// Reflexao: O botao reset permite voltar ao treino original
+// do Jeff Nippard. Importante para quem experimentou mudancas
+// e quer recomecar. Pedi confirmacao para evitar perda
+// acidental de customizacoes.
+// ============================================================
+
+function resetWorkout() {
+  if (confirm('Resetar para o treino original do Jeff Nippard?\nTodas as mudancas serao perdidas.')) {
+    workoutData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    save();
+    window.location.hash = '';
+    activeDay = 0;
+    renderTabs();
+    renderDay();
+    showToast('Treino resetado!');
+  }
+}
+
+// Enter key in modal submits
+document.querySelectorAll('#addModal input').forEach(inp => {
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmAddExercise();
+  });
+});
+
+// Close modal on overlay click
+document.getElementById('addModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeAddModal();
+});
+
+// Init
+init();
+</script>
+</body>
+</html>

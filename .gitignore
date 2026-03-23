@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+whatsapp_chrome_profile/
+oscar_state.json
+.claude/memory/
