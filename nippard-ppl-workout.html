@@ -6,3 +6,696 @@
 <title>PPL Workout Builder</title>
 <style>
 :root{--bg:#0f0f13;--bg2:#1a1a24;--bg3:#22222e;--card:#1e1e2a;--card-hover:#252536;--border:#2a2a3a;--text:#e8e8f0;--text2:#9898b0;--text3:#686880;--accent:#6c5ce7;--accent2:#a29bfe;--push:#fd7272;--push-bg:rgba(253,114,114,0.08);--push-border:rgba(253,114,114,0.2);--pull:#55efc4;--pull-bg:rgba(85,239,196,0.08);--pull-border:rgba(85,239,196,0.2);--legs:#fdcb6e;--legs-bg:rgba(253,203,110,0.08);--legs-border:rgba(253,203,110,0.2);--danger:#ff6b6b;--success:#51cf66;--radius:14px;--radius-sm:10px;--shadow:0 4px 24px rgba(0,0,0,0.3)}
+.light{--bg:#f5f5fa;--bg2:#ffffff;--bg3:#eeeef4;--card:#ffffff;--card-hover:#f8f8fc;--border:#e0e0ea;--text:#1a1a2e;--text2:#5a5a72;--text3:#9898a8;--shadow:0 4px 24px rgba(0,0,0,0.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{height:100%}
+body{font-family:-apple-system,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100%;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* Header */
+.app-header{position:sticky;top:0;z-index:100;background:var(--bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 16px 0}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white}
+.logo-text{font-size:18px;font-weight:700}
+.logo-sub{font-size:11px;color:var(--text3);font-weight:500}
+.header-actions{display:flex;gap:8px}
+.btn-icon{width:38px;height:38px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all 0.2s}
+.btn-icon:hover{background:var(--bg3);color:var(--text)}
+.tabs-wrapper{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.tabs-wrapper::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:8px 14px;border:none;background:transparent;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;border-bottom:2.5px solid transparent;transition:all 0.2s;white-space:nowrap;font-family:inherit}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{color:var(--text)}
+.tab-btn.active[data-type="legs"]{border-bottom-color:var(--legs)}
+.tab-btn.active[data-type="push"]{border-bottom-color:var(--push)}
+.tab-btn.active[data-type="pull"]{border-bottom-color:var(--pull)}
+.day-badge{display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;margin-left:4px;font-weight:700;vertical-align:middle}
+.day-badge.legs{background:var(--legs-bg);color:var(--legs)}
+.day-badge.push{background:var(--push-bg);color:var(--push)}
+.day-badge.pull{background:var(--pull-bg);color:var(--pull)}
+
+/* Main */
+.main{padding:16px;max-width:640px;margin:0 auto}
+.day-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.day-title{font-size:22px;font-weight:800}
+.day-stats{display:flex;gap:12px;font-size:12px;color:var(--text3)}
+
+/* Summary */
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.summary-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.summary-card .val{font-size:20px;font-weight:800}
+.summary-card .lbl{font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-top:2px}
+
+/* Exercise Cards */
+.exercise-list{display:flex;flex-direction:column;gap:8px}
+.exercise-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all 0.2s;position:relative}
+.exercise-card:hover{background:var(--card-hover)}
+.exercise-card.dragging{opacity:0.5;transform:scale(0.98)}
+.exercise-card.drag-over{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card-main{display:flex;align-items:stretch;min-height:72px}
+.drag-handle{width:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:grab;color:var(--text3);font-size:14px;letter-spacing:1px;transition:color 0.2s;user-select:none;touch-action:none}
+.drag-handle:hover{color:var(--text2)}
+.drag-handle:active{cursor:grabbing}
+.card-color-bar{width:3px;flex-shrink:0;border-radius:2px;margin:8px 0}
+.card-color-bar.push{background:var(--push)}
+.card-color-bar.pull{background:var(--pull)}
+.card-color-bar.legs{background:var(--legs)}
+.card-content{flex:1;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.exercise-name{font-size:14px;font-weight:700;line-height:1.3;cursor:text;border-radius:4px;padding:1px 4px;margin:-1px -4px;transition:background 0.2s;word-break:break-word}
+.exercise-name:hover{background:var(--bg3)}
+.exercise-name:focus{outline:none;background:var(--bg3);box-shadow:0 0 0 2px var(--accent)}
+.exercise-order{font-size:11px;color:var(--text3);font-weight:700;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg3);flex-shrink:0}
+.card-details{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;align-items:center}
+.detail-chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text2);background:var(--bg2);padding:3px 8px;border-radius:6px;border:1px solid var(--border)}
+.detail-chip .label{color:var(--text3);font-size:10px;text-transform:uppercase;font-weight:600}
+.detail-chip .value{font-weight:700;cursor:text;border-radius:3px;padding:0 2px;transition:background 0.2s}
+.detail-chip .value:hover{background:var(--bg3)}
+.detail-chip .value:focus{outline:none;background:var(--bg3);box-shadow:0 0 0 1.5px var(--accent)}
+.note-tag{font-size:11px;padding:2px 7px;border-radius:5px;font-weight:600;cursor:text}
+.note-tag:focus{outline:none;box-shadow:0 0 0 1.5px var(--accent)}
+.note-tag.push{background:var(--push-bg);color:var(--push);border:1px solid var(--push-border)}
+.note-tag.pull{background:var(--pull-bg);color:var(--pull);border:1px solid var(--pull-border)}
+.note-tag.legs{background:var(--legs-bg);color:var(--legs);border:1px solid var(--legs-border)}
+.muscle-tags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.muscle-tag{font-size:10px;color:var(--text3);padding:1px 6px;border-radius:4px;background:var(--bg);border:1px solid var(--border);text-transform:uppercase;font-weight:600;letter-spacing:0.3px}
+.card-actions{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:4px;opacity:0;transition:opacity 0.2s}
+.exercise-card:hover .card-actions{opacity:1}
+.btn-card-action{width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.15s}
+.btn-card-action:hover{background:var(--bg3);color:var(--text)}
+.btn-card-action.delete:hover{background:rgba(255,107,107,0.15);color:var(--danger)}
+.add-exercise-btn{width:100%;padding:14px;margin-top:8px;border:2px dashed var(--border);border-radius:var(--radius);background:transparent;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-exercise-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(108,92,231,0.05)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;padding:20px;animation:slideUp 0.3s ease-out}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal h3{font-size:18px;margin-bottom:4px}
+.modal-subtitle{font-size:12px;color:var(--text3);margin-bottom:16px}
+.modal-field{margin-bottom:14px;position:relative}
+.modal-field label{display:block;font-size:12px;color:var(--text3);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.modal-field input,.modal-field textarea{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color 0.2s}
+.modal-field input:focus,.modal-field textarea:focus{border-color:var(--accent)}
+.modal-field textarea{resize:vertical;min-height:60px}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.btn-modal{flex:1;padding:12px;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-modal.primary{background:var(--accent);color:white}
+.btn-modal.primary:hover{background:var(--accent2)}
+.btn-modal.secondary{background:var(--bg3);color:var(--text2)}
+.btn-modal.secondary:hover{background:var(--border);color:var(--text)}
+
+/* Autocomplete */
+.autocomplete-wrapper{position:relative}
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--accent);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);z-index:10;max-height:200px;overflow-y:auto;display:none}
+.autocomplete-list.open{display:block}
+.autocomplete-item{padding:10px 12px;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--border)}
+.autocomplete-item:last-child{border-bottom:none}
+.autocomplete-item:hover,.autocomplete-item.selected{background:var(--bg3)}
+.autocomplete-item-name{font-size:13px;font-weight:600;color:var(--text)}
+.autocomplete-item-muscles{font-size:11px;color:var(--text3);margin-top:2px}
+.autocomplete-item-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(108,92,231,0.15);color:var(--accent2);font-weight:700;margin-left:6px;vertical-align:middle}
+
+/* Auto-fill indicator */
+.autofill-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--accent2);background:rgba(108,92,231,0.1);border:1px solid rgba(108,92,231,0.3);padding:3px 8px;border-radius:6px;margin-bottom:8px}
+.autofill-badge span{font-size:14px}
+
+/* Muscle chips input */
+.muscle-chips-container{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);min-height:42px;cursor:text;transition:border-color 0.2s}
+.muscle-chips-container:focus-within{border-color:var(--accent)}
+.muscle-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(108,92,231,0.15);border:1px solid rgba(108,92,231,0.3);color:var(--accent2);font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px}
+.muscle-chip-remove{cursor:pointer;opacity:0.6;font-size:14px;line-height:1}
+.muscle-chip-remove:hover{opacity:1}
+.muscle-chip-input{border:none;background:transparent;color:var(--text);font-size:13px;font-family:inherit;outline:none;min-width:120px;flex:1}
+.muscle-suggestions{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.muscle-suggestion{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--bg3);border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all 0.15s}
+.muscle-suggestion:hover{background:rgba(108,92,231,0.15);color:var(--accent2);border-color:rgba(108,92,231,0.3)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--success);color:#000;padding:12px 24px;border-radius:var(--radius);font-weight:700;font-size:13px;z-index:300;transition:transform 0.3s ease;box-shadow:var(--shadow)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Footer */
+.app-footer{text-align:center;padding:24px 16px 40px;color:var(--text3);font-size:11px}
+.app-footer a{color:var(--accent2);text-decoration:none}
+
+/* Touch drag */
+.exercise-card.touch-dragging{position:fixed;z-index:150;pointer-events:none;box-shadow:0 12px 40px rgba(0,0,0,0.5);transform:scale(1.03);opacity:0.92;width:calc(100% - 32px);max-width:608px}
+.exercise-card.placeholder{opacity:0.3;border:2px dashed var(--accent);background:transparent}
+
+@media(min-width:640px){.modal{border-radius:20px;margin-bottom:20px}.card-actions{opacity:0.3}.exercise-card:hover .card-actions{opacity:1}}
+@media(max-width:400px){.tab-btn{padding:8px 10px;font-size:12px}.exercise-name{font-size:13px}}
+@media print{.app-header,.header-actions,.card-actions,.add-exercise-btn,.drag-handle{display:none!important}.exercise-card{break-inside:avoid}body{background:white;color:black}}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">N</div>
+      <div>
+        <div class="logo-text">PPL Builder</div>
+        <div class="logo-sub">Jeff Nippard - Smartest PPL</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="toggleTheme()" title="Tema"><span id="themeIcon">&#9728;</span></button>
+      <button class="btn-icon" onclick="resetWorkout()" title="Resetar">&#8635;</button>
+      <button class="btn-icon" onclick="shareWorkout()" title="Compartilhar" style="background:var(--accent);color:white;border-color:var(--accent);">&#10138;</button>
+    </div>
+  </div>
+  <div class="tabs-wrapper" id="tabs"></div>
+</div>
+
+<div class="main" id="main"></div>
+
+<div class="app-footer">
+  Baseado no video <a href="https://www.youtube.com/watch?v=qVek72z3F1U" target="_blank">The Smartest Push Pull Legs Routine</a> por Jeff Nippard<br>
+  Edite, reordene e compartilhe seu treino
+</div>
+
+<!-- Add Exercise Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Adicionar Exercicio</h3>
+    <p class="modal-subtitle">Digite o nome e as sugestoes aparecerao automaticamente 💡</p>
+
+    <!-- Autofill indicator -->
+    <div class="autofill-badge" id="autofillBadge" style="display:none">
+      <span>✨</span> Musculos carregados automaticamente da biblioteca!
+    </div>
+
+    <!-- Nome com autocomplete -->
+    <div class="modal-field">
+      <label>Nome do Exercicio</label>
+      <div class="autocomplete-wrapper">
+        <input type="text" id="newName" placeholder="Ex: Bench Press" autocomplete="off" oninput="onNameInput()" onkeydown="onNameKeydown(event)">
+        <div class="autocomplete-list" id="autocompleteList"></div>
+      </div>
+    </div>
+
+    <!-- Sets e Reps -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="modal-field"><label>Series</label><input type="text" id="newSets" placeholder="3"></div>
+      <div class="modal-field"><label>Reps</label><input type="text" id="newReps" placeholder="10-12"></div>
+    </div>
+
+    <!-- Nota -->
+    <div class="modal-field">
+      <label>Nota / Tecnica (opcional)</label>
+      <input type="text" id="newNote" placeholder="Ex: Drop set no ultimo set">
+    </div>
+
+    <!-- Musculos com chips -->
+    <div class="modal-field">
+      <label>Musculos trabalhados</label>
+      <div class="muscle-chips-container" id="muscleChipsContainer" onclick="focusMuscleInput()">
+        <input type="text" class="muscle-chip-input" id="muscleChipInput" placeholder="Digite e pressione Enter..." oninput="onMuscleInput()" onkeydown="onMuscleKeydown(event)">
+      </div>
+      <div class="muscle-suggestions" id="muscleSuggestions"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-modal secondary" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn-modal primary" onclick="confirmAddExercise()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// EXERCISE LIBRARY — banco de conhecimento de exercicios
+// Combina uma base pre-definida com o que o usuario ensina.
+// Chave = nome normalizado (lowercase, sem acentos)
+// Valor = { name, muscles: [] }
+// ============================================================
+const BUILTIN_LIBRARY = {
+  // PEITO
+  'bench press': {name:'Supino Reto',muscles:['Peito','Triceps','Deltoides Anterior']},
+  'supino': {name:'Supino Reto',muscles:['Peito','Triceps','Deltoides Anterior']},
+  'supino reto': {name:'Supino Reto',muscles:['Peito','Triceps','Deltoides Anterior']},
+  'supino inclinado': {name:'Supino Inclinado',muscles:['Peito Superior','Triceps','Deltoides Anterior']},
+  'supino declinado': {name:'Supino Declinado',muscles:['Peito Inferior','Triceps']},
+  'incline bench press': {name:'Supino Inclinado',muscles:['Peito Superior','Triceps','Deltoides Anterior']},
+  'decline bench press': {name:'Supino Declinado',muscles:['Peito Inferior','Triceps']},
+  'cable crossover': {name:'Crossover no Cabo',muscles:['Peito']},
+  'crossover': {name:'Crossover no Cabo',muscles:['Peito']},
+  'pec deck': {name:'Crucifixo na Maquina',muscles:['Peito']},
+  'chest fly': {name:'Crucifixo com Halteres',muscles:['Peito','Deltoides Anterior']},
+  'dips': {name:'Paralelas (Dips)',muscles:['Peito','Triceps','Deltoides']},
+  'paralelas': {name:'Paralelas (Dips)',muscles:['Peito','Triceps','Deltoides']},
+  'close grip bench press': {name:'Supino Fechado',muscles:['Triceps','Peito']},
+  'supino fechado': {name:'Supino Fechado',muscles:['Triceps','Peito']},
+
+  // OMBRO
+  'overhead press': {name:'Desenvolvimento Militar',muscles:['Deltoides','Triceps','Core']},
+  'desenvolvimento': {name:'Desenvolvimento Militar',muscles:['Deltoides','Triceps','Core']},
+  'military press': {name:'Desenvolvimento Militar',muscles:['Deltoides','Triceps','Core']},
+  'machine shoulder press': {name:'Desenvolvimento na Maquina',muscles:['Deltoides','Triceps']},
+  'lateral raise': {name:'Elevacao Lateral',muscles:['Deltoides Lateral']},
+  'elevacao lateral': {name:'Elevacao Lateral',muscles:['Deltoides Lateral']},
+  'egyptian lateral raise': {name:'Elevacao Lateral Egipcia',muscles:['Deltoides Lateral']},
+  'lateral raise 21s': {name:'Elevacao Lateral 21s',muscles:['Deltoides Lateral']},
+  'front raise': {name:'Elevacao Frontal',muscles:['Deltoides Anterior']},
+  'elevacao frontal': {name:'Elevacao Frontal',muscles:['Deltoides Anterior']},
+  'facepull': {name:'Crucifixo Inverso no Cabo',muscles:['Deltoides Posterior','Romboides']},
+  'face pull': {name:'Crucifixo Inverso no Cabo',muscles:['Deltoides Posterior','Romboides']},
+  'rope facepull': {name:'Crucifixo Inverso no Cabo (Corda)',muscles:['Deltoides Posterior','Romboides']},
+  'reverse pec deck': {name:'Crucifixo Inverso na Maquina',muscles:['Deltoides Posterior']},
+  'neck flexion': {name:'Flexao e Extensao de Pescoco',muscles:['Pescoco']},
+
+  // COSTAS
+  'pull up': {name:'Barra Fixa',muscles:['Dorsais','Biceps','Romboides']},
+  'pullup': {name:'Barra Fixa',muscles:['Dorsais','Biceps','Romboides']},
+  'barra fixa': {name:'Barra Fixa',muscles:['Dorsais','Biceps','Romboides']},
+  'weighted pull up': {name:'Barra Fixa com Carga',muscles:['Dorsais','Biceps','Romboides']},
+  'chin up': {name:'Barra Fixa Supinada',muscles:['Dorsais','Biceps']},
+  'lat pulldown': {name:'Puxada',muscles:['Dorsais','Biceps']},
+  'puxada': {name:'Puxada',muscles:['Dorsais','Biceps']},
+  'omni grip lat pulldown': {name:'Puxada Multi-Pegada',muscles:['Dorsais','Biceps']},
+  'seated cable row': {name:'Remada Sentada no Cabo',muscles:['Dorsais','Romboides','Trapezio']},
+  'remada sentada': {name:'Remada Sentada no Cabo',muscles:['Dorsais','Romboides','Trapezio']},
+  'chest supported row': {name:'Remada com Suporte no Peito',muscles:['Romboides','Trapezio','Dorsais']},
+  'barbell row': {name:'Remada Curvada com Barra',muscles:['Dorsais','Biceps','Lombar']},
+  'remada curvada': {name:'Remada Curvada',muscles:['Dorsais','Biceps','Lombar']},
+  'dumbbell row': {name:'Remada com Halter',muscles:['Dorsais','Biceps']},
+  'cable pullover': {name:'Pullover no Cabo',muscles:['Dorsais','Serratio']},
+  'pullover': {name:'Pullover',muscles:['Dorsais','Peito','Serratio']},
+  'shrug': {name:'Encolhimento de Ombros',muscles:['Trapezio']},
+  'incline dumbbell shrug': {name:'Encolhimento Inclinado com Halteres',muscles:['Trapezio']},
+  'deadlift': {name:'Levantamento Terra',muscles:['Posteriores','Gluteos','Lombar','Core']},
+  'levantamento terra': {name:'Levantamento Terra',muscles:['Posteriores','Gluteos','Lombar','Core']},
+
+  // BICEPS
+  'bicep curl': {name:'Rosca Direta',muscles:['Biceps']},
+  'rosca direta': {name:'Rosca Direta',muscles:['Biceps']},
+  'hammer curl': {name:'Rosca Martelo',muscles:['Biceps','Braquial']},
+  'rosca martelo': {name:'Rosca Martelo',muscles:['Biceps','Braquial']},
+  'hammer cheat curl': {name:'Rosca Martelo com Cheat',muscles:['Biceps','Braquial']},
+  'incline dumbbell curl': {name:'Rosca Inclinada com Halteres',muscles:['Biceps']},
+  'rosca inclinada': {name:'Rosca Inclinada',muscles:['Biceps']},
+  'pronated supinated curl': {name:'Rosca Pronada e Supinada',muscles:['Biceps','Braquioradial']},
+  'preacher curl': {name:'Rosca Scott',muscles:['Biceps']},
+  'rosca scott': {name:'Rosca Scott',muscles:['Biceps']},
+
+  // TRICEPS
+  'skullcrusher': {name:'Triceps Testa',muscles:['Triceps']},
+  'tricep extension': {name:'Extensao de Triceps',muscles:['Triceps']},
+  'eccentric skullcrushers': {name:'Triceps Testa Excentrico',muscles:['Triceps']},
+  'overhead tricep extension': {name:'Triceps Testa sobre a Cabeca',muscles:['Triceps Cabeca Longa']},
+  'tricep kickback': {name:'Triceps Coice',muscles:['Triceps']},
+  'cable tricep kickback': {name:'Triceps Coice no Cabo',muscles:['Triceps']},
+  'tricep pushdown': {name:'Triceps Puxada no Cabo',muscles:['Triceps']},
+  'testa': {name:'Triceps Testa',muscles:['Triceps']},
+
+  // PERNAS
+  'squat': {name:'Agachamento Livre',muscles:['Quadriceps','Gluteos','Core']},
+  'agachamento': {name:'Agachamento Livre',muscles:['Quadriceps','Gluteos','Core']},
+  'leg press': {name:'Leg Press',muscles:['Quadriceps','Gluteos']},
+  'single leg press': {name:'Leg Press Unilateral',muscles:['Quadriceps','Gluteos']},
+  'hack squat': {name:'Agachamento Hack',muscles:['Quadriceps','Gluteos']},
+  'leg extension': {name:'Extensora',muscles:['Quadriceps']},
+  'eccentric leg extension': {name:'Extensora Excentrica',muscles:['Quadriceps']},
+  'leg curl': {name:'Flexora',muscles:['Posteriores']},
+  'seated leg curls': {name:'Flexora Sentada',muscles:['Posteriores']},
+  'romanian deadlift': {name:'Levantamento Terra Romeno',muscles:['Posteriores','Gluteos','Lombar']},
+  'rdl': {name:'Levantamento Terra Romeno',muscles:['Posteriores','Gluteos','Lombar']},
+  'stiff': {name:'Stiff',muscles:['Posteriores','Gluteos','Lombar']},
+  'nordic ham curl': {name:'Flexora Nordica',muscles:['Posteriores']},
+  'hip thrust': {name:'Elevacao Pelvica',muscles:['Gluteos']},
+  'single leg hip thrust': {name:'Elevacao Pelvica Unilateral',muscles:['Gluteos']},
+  'glute bridge': {name:'Ponte de Gluteos',muscles:['Gluteos']},
+  'calf raise': {name:'Elevacao de Panturrilha',muscles:['Panturrilha']},
+  'standing calf raise': {name:'Elevacao de Panturrilha em Pe',muscles:['Panturrilha']},
+  'single leg calf raise': {name:'Elevacao de Panturrilha Unilateral',muscles:['Panturrilha']},
+  'panturrilha': {name:'Elevacao de Panturrilha',muscles:['Panturrilha']},
+  'back extension': {name:'Extensao de Lombar',muscles:['Lombar','Gluteos']},
+  'prisoner back extension': {name:'Extensao de Lombar com Peso',muscles:['Lombar','Gluteos']},
+  'l sit': {name:'Sustentacao L-Sit',muscles:['Abdomen','Core','Flexores do Quadril']},
+  'weighted l sit hold': {name:'Sustentacao L-Sit com Peso',muscles:['Abdomen','Core','Flexores do Quadril']},
+
+  // CORE / ABS
+  'plank': {name:'Prancha',muscles:['Core','Abdomen']},
+  'prancha': {name:'Prancha',muscles:['Core','Abdomen']},
+  'long lever planks': {name:'Prancha Alavanca Longa',muscles:['Core','Abdomen']},
+  'crunch': {name:'Abdominal',muscles:['Abdomen']},
+  'decline crunches': {name:'Abdominal Declinado',muscles:['Abdomen']},
+  'abs': {name:'Abdominal',muscles:['Abdomen']},
+};
+
+const ALL_MUSCLES = [
+  'Peito','Peito Superior','Peito Inferior','Triceps','Triceps Cabeca Longa',
+  'Deltoides','Deltoides Anterior','Deltoides Lateral','Deltoides Posterior',
+  'Dorsais','Biceps','Braquial','Braquioradial','Romboides','Trapezio','Serratio',
+  'Quadriceps','Gluteos','Posteriores','Lombar','Panturrilha','Hip Flexors',
+  'Abdomen','Core','Pescoco','Antebraco'
+];
+
+// ============================================================
+// STATE
+// ============================================================
+const DEFAULT_DATA=[
+{id:'legs1',name:'Pernas 1',type:'legs',subtitle:'Enfase em Agachamento',exercises:[
+  {id:'l1e1',name:'Agachamento Livre',sets:'3',reps:'4',note:'80% 1RM',muscles:['Quadriceps','Gluteos','Core']},
+  {id:'l1e2',name:'Levantamento Terra Romeno',sets:'3',reps:'10',note:'',muscles:['Posteriores','Gluteos','Lombar']},
+  {id:'l1e3',name:'Leg Press Unilateral',sets:'3',reps:'15',note:'Unilateral',muscles:['Quadriceps','Gluteos']},
+  {id:'l1e4',name:'Extensora Excentrica',sets:'3',reps:'10-12',note:'Fase excentrica lenta',muscles:['Quadriceps']},
+  {id:'l1e5',name:'Flexora Sentada',sets:'3',reps:'10-12',note:'',muscles:['Posteriores']},
+  {id:'l1e6',name:'Elevacao de Panturrilha em Pe',sets:'3',reps:'10-12',note:'',muscles:['Panturrilha']},
+  {id:'l1e7',name:'Abdominal Declinado',sets:'2',reps:'10-12',note:'SUPERSET com Prancha',muscles:['Abdomen']},
+  {id:'l1e8',name:'Prancha Alavanca Longa',sets:'2',reps:'30s',note:'SUPERSET com Abdominal',muscles:['Core','Abdomen']}
+]},
+{id:'push1',name:'Empurrar 1',type:'push',subtitle:'Enfase em Supino',exercises:[
+  {id:'p1e1',name:'Supino Reto',sets:'3',reps:'8',note:'72.5% 1RM',muscles:['Peito','Triceps','Deltoides Anterior']},
+  {id:'p1e2',name:'Desenvolvimento na Maquina',sets:'3',reps:'12',note:'',muscles:['Deltoides','Triceps']},
+  {id:'p1e3',name:'Paralelas (Dips)',sets:'3',reps:'12-15',note:'',muscles:['Peito','Triceps','Deltoides']},
+  {id:'p1e4',name:'Triceps Testa Excentrico',sets:'3',reps:'8-10',note:'Fase excentrica lenta',muscles:['Triceps']},
+  {id:'p1e5',name:'Elevacao Lateral Egipcia',sets:'3',reps:'12+MYO',note:'Myoreps no ultimo set',muscles:['Deltoides Lateral']},
+  {id:'p1e6',name:'Triceps Coice no Cabo',sets:'3',reps:'20-30',note:'Reps altas',muscles:['Triceps']}
+]},
+{id:'pull1',name:'Puxar 1',type:'pull',subtitle:'Enfase em Barra Fixa',exercises:[
+  {id:'r1e1',name:'Barra Fixa com Carga',sets:'3',reps:'6',note:'Com carga adicional',muscles:['Dorsais','Biceps','Romboides']},
+  {id:'r1e2',name:'Remada Sentada no Cabo',sets:'3',reps:'10-12',note:'',muscles:['Dorsais','Romboides','Trapezio']},
+  {id:'r1e3',name:'Pullover no Cabo',sets:'3',reps:'15-20',note:'',muscles:['Dorsais','Serratio']},
+  {id:'r1e4',name:'Rosca Martelo com Cheat',sets:'3',reps:'8-10',note:'Cheat controlado',muscles:['Biceps','Braquial']},
+  {id:'r1e5',name:'Rosca Inclinada com Halteres',sets:'2',reps:'12-15',note:'',muscles:['Biceps']}
+]},
+{id:'legs2',name:'Pernas 2',type:'legs',subtitle:'Enfase em Levantamento Terra',exercises:[
+  {id:'l2e1',name:'Levantamento Terra',sets:'3',reps:'3',note:'80-85% 1RM',muscles:['Posteriores','Gluteos','Lombar','Core']},
+  {id:'l2e2',name:'Agachamento Hack',sets:'3',reps:'10-12',note:'',muscles:['Quadriceps','Gluteos']},
+  {id:'l2e3',name:'Elevacao Pelvica Unilateral',sets:'2',reps:'15',note:'Unilateral',muscles:['Gluteos']},
+  {id:'l2e4',name:'Flexora Nordica',sets:'2',reps:'10-12',note:'SUPERSET com Extensao',muscles:['Posteriores']},
+  {id:'l2e5',name:'Extensao de Lombar com Peso',sets:'2',reps:'10-12',note:'SUPERSET com Nordica',muscles:['Lombar','Gluteos']},
+  {id:'l2e6',name:'Elevacao de Panturrilha Unilateral',sets:'3',reps:'8-10',note:'Unilateral',muscles:['Panturrilha']},
+  {id:'l2e7',name:'Sustentacao L-Sit com Peso',sets:'3',reps:'max hold',note:'',muscles:['Abdomen','Core','Flexores do Quadril']}
+]},
+{id:'push2',name:'Empurrar 2',type:'push',subtitle:'Enfase em Desenvolvimento',exercises:[
+  {id:'p2e1',name:'Desenvolvimento Militar',sets:'4',reps:'4',note:'80% 1RM',muscles:['Deltoides','Triceps','Core']},
+  {id:'p2e2',name:'Supino Fechado',sets:'3',reps:'10',note:'Pegada fechada',muscles:['Triceps','Peito']},
+  {id:'p2e3',name:'Crossover no Cabo',sets:'3',reps:'10-12',note:'Drop set no ultimo set (-50%)',muscles:['Peito']},
+  {id:'p2e4',name:'Triceps Testa sobre a Cabeca',sets:'3',reps:'10-12',note:'',muscles:['Triceps Cabeca Longa']},
+  {id:'p2e5',name:'Elevacao Lateral 21s',sets:'3',reps:'7/7/7',note:'7 completo + 7 de cima + 7 de baixo',muscles:['Deltoides Lateral']},
+  {id:'p2e6',name:'Flexao e Extensao de Pescoco',sets:'3',reps:'10-12',note:'Flexao + Extensao',muscles:['Pescoco']}
+]},
+{id:'pull2',name:'Puxar 2',type:'pull',subtitle:'Enfase em Puxada',exercises:[
+  {id:'r2e1',name:'Puxada Multi-Pegada',sets:'3',reps:'10-12',note:'Set 1: aberta / Set 2: fechada / Set 3: supinada',muscles:['Dorsais','Biceps']},
+  {id:'r2e2',name:'Remada com Suporte no Peito',sets:'3',reps:'10-12',note:'',muscles:['Romboides','Trapezio','Dorsais']},
+  {id:'r2e3',name:'Crucifixo Inverso no Cabo',sets:'3',reps:'15-20',note:'',muscles:['Deltoides Posterior','Romboides']},
+  {id:'r2e4',name:'Encolhimento Inclinado com Halteres',sets:'3',reps:'15-20',note:'Opcional',muscles:['Trapezio']},
+  {id:'r2e5',name:'Crucifixo Inverso na Maquina',sets:'2',reps:'15+10-15',note:'Reps extras apos pausa',muscles:['Deltoides Posterior']},
+  {id:'r2e6',name:'Rosca Pronada e Supinada',sets:'3',reps:'10/10',note:'10 pronada + 10 supinada',muscles:['Biceps','Braquioradial']}
+]}];
+
+let workoutData=[], activeDay=0, dragSrcIndex=null, touchDragEl=null, touchDragIndex=null, touchPlaceholder=null;
+let currentMuscles=[], autocompleteIndex=-1;
+
+// ============================================================
+// LIBRARY FUNCTIONS
+// ============================================================
+function getUserLibrary(){
+  try{return JSON.parse(localStorage.getItem('ppl-exercise-library')||'{}')}catch(e){return{}}
+}
+function saveToLibrary(name, muscles){
+  if(!name||!muscles.length)return;
+  const lib=getUserLibrary();
+  const key=normalizeKey(name);
+  lib[key]={name, muscles, custom:true};
+  localStorage.setItem('ppl-exercise-library',JSON.stringify(lib));
+}
+function normalizeKey(str){
+  return str.toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+}
+function lookupExercise(name){
+  const key=normalizeKey(name);
+  // Primeiro verifica biblioteca do usuario
+  const userLib=getUserLibrary();
+  if(userLib[key])return userLib[key];
+  // Depois verifica biblioteca built-in
+  if(BUILTIN_LIBRARY[key])return BUILTIN_LIBRARY[key];
+  // Busca parcial
+  for(const k of Object.keys(userLib)){if(k.includes(key)||key.includes(k))return userLib[k]}
+  for(const k of Object.keys(BUILTIN_LIBRARY)){if(k.includes(key)||key.includes(k))return BUILTIN_LIBRARY[k]}
+  return null;
+}
+function searchLibrary(query){
+  if(!query||query.length<2)return[];
+  const key=normalizeKey(query);
+  const userLib=getUserLibrary();
+  const results=[];
+  const seen=new Set();
+  // User library first
+  for(const[k,v]of Object.entries(userLib)){
+    if(k.includes(key)||key.split(' ').some(w=>k.includes(w))){
+      if(!seen.has(k)){seen.add(k);results.push({...v,key:k,custom:true})}
+    }
+  }
+  // Built-in
+  for(const[k,v]of Object.entries(BUILTIN_LIBRARY)){
+    if(k.includes(key)||key.split(' ').some(w=>w.length>2&&k.includes(w))){
+      if(!seen.has(k)){seen.add(k);results.push({...v,key:k,custom:false})}
+    }
+  }
+  return results.slice(0,7);
+}
+
+// ============================================================
+// INIT & RENDER
+// ============================================================
+function init(){
+  const hash=window.location.hash.slice(1);
+  if(hash){try{workoutData=JSON.parse(decodeURIComponent(atob(hash)))}catch(e){workoutData=JSON.parse(JSON.stringify(DEFAULT_DATA))}}
+  else{const saved=localStorage.getItem('nippard-ppl');if(saved){try{workoutData=JSON.parse(saved)}catch(e){workoutData=JSON.parse(JSON.stringify(DEFAULT_DATA))}}else{workoutData=JSON.parse(JSON.stringify(DEFAULT_DATA))}}
+  if(localStorage.getItem('ppl-theme')==='light'){document.body.classList.add('light');document.getElementById('themeIcon').innerHTML='&#9790;'}
+  renderTabs();renderDay();
+}
+function save(){localStorage.setItem('nippard-ppl',JSON.stringify(workoutData))}
+function renderTabs(){
+  document.getElementById('tabs').innerHTML=workoutData.map((day,i)=>
+    `<button class="tab-btn ${i===activeDay?'active':''}" data-type="${day.type}" onclick="switchDay(${i})">Dia ${i+1} <span class="day-badge ${day.type}">${day.type.toUpperCase()}</span></button>`
+  ).join('')
+}
+function renderDay(){
+  const day=workoutData[activeDay];if(!day)return;
+  const totalSets=day.exercises.reduce((sum,ex)=>sum+(parseInt(ex.sets)||0),0);
+  const totalEx=day.exercises.length;
+  let html=`<div class="day-header"><div><div class="day-title">${day.name}</div><div style="font-size:12px;color:var(--text3);margin-top:2px">${day.subtitle||''}</div></div><div class="day-stats"><span>${totalEx} exercicios</span><span>${totalSets} series</span></div></div>
+  <div class="summary-grid">
+    <div class="summary-card"><div class="val" style="color:var(--${day.type})">${totalEx}</div><div class="lbl">Exercicios</div></div>
+    <div class="summary-card"><div class="val">${totalSets}</div><div class="lbl">Series Total</div></div>
+    <div class="summary-card"><div class="val">~${Math.round(totalSets*2.5)}'</div><div class="lbl">Tempo Est.</div></div>
+  </div>
+  <div class="exercise-list" id="exerciseList">`;
+  day.exercises.forEach((ex,i)=>{
+    const noteHtml=ex.note?`<span class="note-tag ${day.type}" contenteditable="true" onblur="updateNote(${i},this.textContent)">${ex.note}</span>`:'';
+    const muscleHtml=(ex.muscles&&ex.muscles.length)?`<div class="muscle-tags">${ex.muscles.map(m=>`<span class="muscle-tag">${m}</span>`).join('')}</div>`:'';
+    html+=`<div class="exercise-card" draggable="true" ondragstart="onDragStart(event,${i})" ondragover="onDragOver(event,${i})" ondragleave="onDragLeave(event)" ondrop="onDrop(event,${i})" ondragend="onDragEnd(event)" data-index="${i}">
+      <div class="card-main">
+        <div class="drag-handle" ontouchstart="onTouchStart(event,${i})" ontouchmove="onTouchMove(event)" ontouchend="onTouchEnd(event)">&#9776;</div>
+        <div class="card-color-bar ${day.type}"></div>
+        <div class="card-content">
+          <div class="card-top">
+            <span class="exercise-name" contenteditable="true" onblur="updateName(${i},this.textContent)">${ex.name}</span>
+            <span class="exercise-order">${i+1}</span>
+          </div>
+          <div class="card-details">
+            <div class="detail-chip"><span class="label">Sets</span><span class="value" contenteditable="true" onblur="updateSets(${i},this.textContent)">${ex.sets}</span></div>
+            <div class="detail-chip"><span class="label">Reps</span><span class="value" contenteditable="true" onblur="updateReps(${i},this.textContent)">${ex.reps}</span></div>
+            ${noteHtml}
+          </div>
+          ${muscleHtml}
+        </div>
+        <div class="card-actions">
+          <button class="btn-card-action" onclick="duplicateExercise(${i})" title="Duplicar">&#10697;</button>
+          <button class="btn-card-action" onclick="addNote(${i})" title="Nota">${ex.note?'&#9998;':'&#128172;'}</button>
+          <button class="btn-card-action delete" onclick="deleteExercise(${i})" title="Remover">&#10005;</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  html+=`</div><button class="add-exercise-btn" onclick="openAddModal()">+ Adicionar Exercicio</button>`;
+  document.getElementById('main').innerHTML=html;
+}
+function switchDay(i){activeDay=i;renderTabs();renderDay()}
+
+// ============================================================
+// INLINE EDITING
+// ============================================================
+function updateName(i,val){workoutData[activeDay].exercises[i].name=val.trim();save()}
+function updateSets(i,val){workoutData[activeDay].exercises[i].sets=val.trim();save();renderDay()}
+function updateReps(i,val){workoutData[activeDay].exercises[i].reps=val.trim();save()}
+function updateNote(i,val){workoutData[activeDay].exercises[i].note=val.trim();save()}
+
+// ============================================================
+// AUTOCOMPLETE
+// ============================================================
+function onNameInput(){
+  const val=document.getElementById('newName').value;
+  const results=searchLibrary(val);
+  renderAutocomplete(results);
+  // Tenta autofill se tiver match exato
+  const match=lookupExercise(val);
+  if(match&&normalizeKey(val)===normalizeKey(match.name)){
+    applyExerciseData(match,false);
+  }
+}
+function renderAutocomplete(results){
+  const list=document.getElementById('autocompleteList');
+  if(!results.length){list.classList.remove('open');return}
+  list.innerHTML=results.map((r,i)=>`
+    <div class="autocomplete-item ${i===autocompleteIndex?'selected':''}" onmousedown="selectAutocomplete('${escapeAttr(r.name)}','${escapeAttr(JSON.stringify(r.muscles))}')">
+      <div class="autocomplete-item-name">${r.name}${r.custom?'<span class="autocomplete-item-badge">⭐ Meu</span>':''}</div>
+      <div class="autocomplete-item-muscles">${r.muscles.join(', ')}</div>
+    </div>`).join('');
+  list.classList.add('open');
+  autocompleteIndex=-1;
+}
+function escapeAttr(s){return s.replace(/'/g,'&apos;').replace(/"/g,'&quot;')}
+function selectAutocomplete(name,musclesJson){
+  document.getElementById('newName').value=name;
+  const muscles=JSON.parse(musclesJson.replace(/&apos;/g,"'").replace(/&quot;/g,'"'));
+  applyExerciseData({name,muscles},true);
+  document.getElementById('autocompleteList').classList.remove('open');
+}
+function applyExerciseData(data, showBadge){
+  currentMuscles=[...data.muscles];
+  renderMuscleChips();
+  const badge=document.getElementById('autofillBadge');
+  badge.style.display=showBadge?'inline-flex':'none';
+}
+function onNameKeydown(e){
+  const list=document.getElementById('autocompleteList');
+  const items=list.querySelectorAll('.autocomplete-item');
+  if(e.key==='ArrowDown'){e.preventDefault();autocompleteIndex=Math.min(autocompleteIndex+1,items.length-1);items.forEach((el,i)=>el.classList.toggle('selected',i===autocompleteIndex))}
+  else if(e.key==='ArrowUp'){e.preventDefault();autocompleteIndex=Math.max(autocompleteIndex-1,0);items.forEach((el,i)=>el.classList.toggle('selected',i===autocompleteIndex))}
+  else if(e.key==='Enter'&&autocompleteIndex>=0){items[autocompleteIndex].dispatchEvent(new MouseEvent('mousedown'))}
+  else if(e.key==='Escape'){list.classList.remove('open')}
+  else if(e.key==='Tab'){list.classList.remove('open')}
+}
+
+// ============================================================
+// MUSCLE CHIPS
+// ============================================================
+function focusMuscleInput(){document.getElementById('muscleChipInput').focus()}
+function renderMuscleChips(){
+  const container=document.getElementById('muscleChipsContainer');
+  const input=document.getElementById('muscleChipInput');
+  // Remove chips antigos mas mantém o input
+  container.querySelectorAll('.muscle-chip').forEach(c=>c.remove());
+  // Adiciona chips
+  currentMuscles.forEach((m,i)=>{
+    const chip=document.createElement('div');
+    chip.className='muscle-chip';
+    chip.innerHTML=`${m}<span class="muscle-chip-remove" onclick="removeMuscle(${i})">×</span>`;
+    container.insertBefore(chip,input);
+  });
+  // Sugestoes
+  renderMuscleSuggestions(input.value);
+}
+function removeMuscle(i){currentMuscles.splice(i,1);renderMuscleChips()}
+function addMuscle(muscle){
+  muscle=muscle.trim();
+  if(muscle&&!currentMuscles.includes(muscle)){currentMuscles.push(muscle);renderMuscleChips();document.getElementById('muscleChipInput').value=''}
+}
+function onMuscleInput(){
+  renderMuscleSuggestions(document.getElementById('muscleChipInput').value);
+}
+function renderMuscleSuggestions(query){
+  const container=document.getElementById('muscleSuggestions');
+  const q=query.toLowerCase().trim();
+  const suggestions=ALL_MUSCLES.filter(m=>!currentMuscles.includes(m)&&(q===''||m.toLowerCase().includes(q))).slice(0,10);
+  container.innerHTML=suggestions.map(m=>`<span class="muscle-suggestion" onclick="addMuscle('${m}')">${m}</span>`).join('');
+}
+function onMuscleKeydown(e){
+  const input=document.getElementById('muscleChipInput');
+  if(e.key==='Enter'||e.key===','||e.key===';'){
+    e.preventDefault();
+    if(input.value.trim())addMuscle(input.value);
+  } else if(e.key==='Backspace'&&!input.value&&currentMuscles.length){
+    currentMuscles.pop();renderMuscleChips();
+  }
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openAddModal(){
+  currentMuscles=[];
+  document.getElementById('newName').value='';
+  document.getElementById('newSets').value='';
+  document.getElementById('newReps').value='';
+  document.getElementById('newNote').value='';
+  document.getElementById('muscleChipInput').value='';
+  document.getElementById('autofillBadge').style.display='none';
+  document.getElementById('autocompleteList').classList.remove('open');
+  renderMuscleChips();
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(()=>document.getElementById('newName').focus(),300);
+}
+function closeAddModal(){
+  document.getElementById('addModal').classList.remove('open');
+  document.getElementById('autocompleteList').classList.remove('open');
+}
+function confirmAddExercise(){
+  const name=document.getElementById('newName').value.trim();
+  if(!name)return;
+  const sets=document.getElementById('newSets').value.trim()||'3';
+  const reps=document.getElementById('newReps').value.trim()||'10';
+  const note=document.getElementById('newNote').value.trim();
+  // Pega músculo do chip input se ainda não confirmado
+  const chipInputVal=document.getElementById('muscleChipInput').value.trim();
+  if(chipInputVal)addMuscle(chipInputVal);
+  const muscles=[...currentMuscles];
+  // Salva na biblioteca do usuario para proxima vez!
+  if(muscles.length){saveToLibrary(name,muscles);showToast('Exercicio salvo na biblioteca! ⭐')}
+  workoutData[activeDay].exercises.push({id:'custom_'+Date.now(),name,sets,reps,note,muscles});
+  save();closeAddModal();renderDay();
+  setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),100);
+}
+
+// ============================================================
+// CRUD
+// ============================================================
+function deleteExercise(i){if(confirm(`Remover "${workoutData[activeDay].exercises[i].name}"?`)){workoutData[activeDay].exercises.splice(i,1);save();renderDay()}}
+function duplicateExercise(i){const ex=workoutData[activeDay].exercises[i];const clone={...ex,id:'dup_'+Date.now(),name:ex.name+' (copia)',muscles:[...(ex.muscles||[])]};workoutData[activeDay].exercises.splice(i+1,0,clone);save();renderDay()}
+function addNote(i){const current=workoutData[activeDay].exercises[i].note||'';const note=prompt('Nota / Tecnica:',current);if(note!==null){workoutData[activeDay].exercises[i].note=note;save();renderDay()}}
+
+// ============================================================
+// DRAG & DROP Desktop
+// ============================================================
+function onDragStart(e,i){dragSrcIndex=i;e.target.closest('.exercise-card').classList.add('dragging');e.dataTransfer.effectAllowed='move'}
+function onDragOver(e,i){e.preventDefault();const card=e.target.closest('.exercise-card');document.querySelectorAll('.exercise-card').forEach(c=>c.classList.remove('drag-over'));if(card&&i!==dragSrcIndex)card.classList.add('drag-over')}
+function onDragLeave(e){const card=e.target.closest('.exercise-card');if(card)card.classList.remove('drag-over')}
+function onDrop(e,i){e.preventDefault();if(dragSrcIndex===null||dragSrcIndex===i)return;const ex=workoutData[activeDay].exercises;const moved=ex.splice(dragSrcIndex,1)[0];ex.splice(i,0,moved);save();renderDay()}
+function onDragEnd(){dragSrcIndex=null;document.querySelectorAll('.exercise-card').forEach(c=>c.classList.remove('dragging','drag-over'))}
+
+// ============================================================
+// DRAG & DROP Touch
+// ============================================================
+function onTouchStart(e,i){if(e.touches.length!==1)return;touchDragIndex=i;const card=e.target.closest('.exercise-card');const rect=card.getBoundingClientRect();touchDragEl=card.cloneNode(true);touchDragEl.classList.add('touch-dragging');touchDragEl.style.width=rect.width+'px';touchDragEl.style.left=rect.left+'px';touchDragEl.style.top=rect.top+'px';document.body.appendChild(touchDragEl);card.classList.add('placeholder');touchPlaceholder=card}
+function onTouchMove(e){if(!touchDragEl)return;e.preventDefault();const touch=e.touches[0];touchDragEl.style.top=(touch.clientY-36)+'px';document.querySelectorAll('.exercise-card:not(.touch-dragging):not(.placeholder)').forEach(c=>c.classList.remove('drag-over'));const target=document.elementFromPoint(touch.clientX,touch.clientY);if(target){const card=target.closest('.exercise-card');if(card&&!card.classList.contains('placeholder'))card.classList.add('drag-over')}}
+function onTouchEnd(){if(!touchDragEl||touchDragIndex===null)return;const overCard=document.querySelector('.exercise-card.drag-over');if(overCard){const ti=parseInt(overCard.dataset.index);if(ti!==touchDragIndex){const ex=workoutData[activeDay].exercises;const moved=ex.splice(touchDragIndex,1)[0];ex.splice(ti,0,moved);save()}}if(touchDragEl&&touchDragEl.parentNode)touchDragEl.parentNode.removeChild(touchDragEl);if(touchPlaceholder)touchPlaceholder.classList.remove('placeholder');touchDragEl=null;touchDragIndex=null;touchPlaceholder=null;document.querySelectorAll('.exercise-card').forEach(c=>c.classList.remove('drag-over'));renderDay()}
+
+// ============================================================
+// SHARE / THEME / RESET
+// ============================================================
+function shareWorkout(){try{const encoded=btoa(encodeURIComponent(JSON.stringify(workoutData)));const url=window.location.origin+window.location.pathname+'#'+encoded;if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(url).then(()=>showToast('Link copiado!'))}else{const ta=document.createElement('textarea');ta.value=url;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('Link copiado!')}}catch(e){showToast('Erro ao copiar')}}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function toggleTheme(){document.body.classList.toggle('light');const l=document.body.classList.contains('light');document.getElementById('themeIcon').innerHTML=l?'&#9790;':'&#9728;';localStorage.setItem('ppl-theme',l?'light':'dark')}
+function resetWorkout(){if(confirm('Resetar para o treino original?\nTodas as mudancas serao perdidas.')){workoutData=JSON.parse(JSON.stringify(DEFAULT_DATA));save();window.location.hash='';activeDay=0;renderTabs();renderDay();showToast('Treino resetado!')}}
+
+// Fechar modal ao clicar fora
+document.getElementById('addModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAddModal()});
+// Fechar autocomplete ao clicar fora
+document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete-wrapper'))document.getElementById('autocompleteList').classList.remove('open')});
+
+init();
+</script>
+</body>
+</html>
