@@ -206,7 +206,7 @@ body{font-family:-apple-system,'SF Pro Display','Inter','Segoe UI',system-ui,san
     <!-- Nota -->
     <div class="modal-field">
       <label>Nota / Tecnica (opcional)</label>
-      <input type="text" id="newNote" placeholder="Ex: Drop set no ultimo set">
+      <input type="text" id="newNote" placeholder="Ex: Serie descendente no ultimo set">
     </div>
 
     <!-- Musculos com chips -->
@@ -296,7 +296,7 @@ const BUILTIN_LIBRARY = {
   'rosca direta': {name:'Rosca Direta',muscles:['Biceps']},
   'hammer curl': {name:'Rosca Martelo',muscles:['Biceps','Braquial']},
   'rosca martelo': {name:'Rosca Martelo',muscles:['Biceps','Braquial']},
-  'hammer cheat curl': {name:'Rosca Martelo com Cheat',muscles:['Biceps','Braquial']},
+  'hammer cheat curl': {name:'Rosca Martelo com Impulso',muscles:['Biceps','Braquial']},
   'incline dumbbell curl': {name:'Rosca Inclinada com Halteres',muscles:['Biceps']},
   'rosca inclinada': {name:'Rosca Inclinada',muscles:['Biceps']},
   'pronated supinated curl': {name:'Rosca Pronada e Supinada',muscles:['Biceps','Braquioradial']},
@@ -352,7 +352,7 @@ const ALL_MUSCLES = [
   'Peito','Peito Superior','Peito Inferior','Triceps','Triceps Cabeca Longa',
   'Deltoides','Deltoides Anterior','Deltoides Lateral','Deltoides Posterior',
   'Dorsais','Biceps','Braquial','Braquioradial','Romboides','Trapezio','Serratio',
-  'Quadriceps','Gluteos','Posteriores','Lombar','Panturrilha','Hip Flexors',
+  'Quadriceps','Gluteos','Posteriores','Lombar','Panturrilha','Flexores do Quadril',
   'Abdomen','Core','Pescoco','Antebraco'
 ];
 
@@ -367,37 +367,37 @@ const DEFAULT_DATA=[
   {id:'l1e4',name:'Extensora Excentrica',sets:'3',reps:'10-12',note:'Fase excentrica lenta',muscles:['Quadriceps']},
   {id:'l1e5',name:'Flexora Sentada',sets:'3',reps:'10-12',note:'',muscles:['Posteriores']},
   {id:'l1e6',name:'Elevacao de Panturrilha em Pe',sets:'3',reps:'10-12',note:'',muscles:['Panturrilha']},
-  {id:'l1e7',name:'Abdominal Declinado',sets:'2',reps:'10-12',note:'SUPERSET com Prancha',muscles:['Abdomen']},
-  {id:'l1e8',name:'Prancha Alavanca Longa',sets:'2',reps:'30s',note:'SUPERSET com Abdominal',muscles:['Core','Abdomen']}
+  {id:'l1e7',name:'Abdominal Declinado',sets:'2',reps:'10-12',note:'BISERIE com Prancha',muscles:['Abdomen']},
+  {id:'l1e8',name:'Prancha Alavanca Longa',sets:'2',reps:'30s',note:'BISERIE com Abdominal',muscles:['Core','Abdomen']}
 ]},
 {id:'push1',name:'Empurrar 1',type:'push',subtitle:'Enfase em Supino',exercises:[
   {id:'p1e1',name:'Supino Reto',sets:'3',reps:'8',note:'72.5% 1RM',muscles:['Peito','Triceps','Deltoides Anterior']},
   {id:'p1e2',name:'Desenvolvimento na Maquina',sets:'3',reps:'12',note:'',muscles:['Deltoides','Triceps']},
   {id:'p1e3',name:'Paralelas (Dips)',sets:'3',reps:'12-15',note:'',muscles:['Peito','Triceps','Deltoides']},
   {id:'p1e4',name:'Triceps Testa Excentrico',sets:'3',reps:'8-10',note:'Fase excentrica lenta',muscles:['Triceps']},
-  {id:'p1e5',name:'Elevacao Lateral Egipcia',sets:'3',reps:'12+MYO',note:'Myoreps no ultimo set',muscles:['Deltoides Lateral']},
+  {id:'p1e5',name:'Elevacao Lateral Egipcia',sets:'3',reps:'12+MYO',note:'Mioreps no ultimo set',muscles:['Deltoides Lateral']},
   {id:'p1e6',name:'Triceps Coice no Cabo',sets:'3',reps:'20-30',note:'Reps altas',muscles:['Triceps']}
 ]},
 {id:'pull1',name:'Puxar 1',type:'pull',subtitle:'Enfase em Barra Fixa',exercises:[
   {id:'r1e1',name:'Barra Fixa com Carga',sets:'3',reps:'6',note:'Com carga adicional',muscles:['Dorsais','Biceps','Romboides']},
   {id:'r1e2',name:'Remada Sentada no Cabo',sets:'3',reps:'10-12',note:'',muscles:['Dorsais','Romboides','Trapezio']},
   {id:'r1e3',name:'Pullover no Cabo',sets:'3',reps:'15-20',note:'',muscles:['Dorsais','Serratio']},
-  {id:'r1e4',name:'Rosca Martelo com Cheat',sets:'3',reps:'8-10',note:'Cheat controlado',muscles:['Biceps','Braquial']},
+  {id:'r1e4',name:'Rosca Martelo com Impulso',sets:'3',reps:'8-10',note:'Impulso controlado',muscles:['Biceps','Braquial']},
   {id:'r1e5',name:'Rosca Inclinada com Halteres',sets:'2',reps:'12-15',note:'',muscles:['Biceps']}
 ]},
 {id:'legs2',name:'Pernas 2',type:'legs',subtitle:'Enfase em Levantamento Terra',exercises:[
   {id:'l2e1',name:'Levantamento Terra',sets:'3',reps:'3',note:'80-85% 1RM',muscles:['Posteriores','Gluteos','Lombar','Core']},
   {id:'l2e2',name:'Agachamento Hack',sets:'3',reps:'10-12',note:'',muscles:['Quadriceps','Gluteos']},
   {id:'l2e3',name:'Elevacao Pelvica Unilateral',sets:'2',reps:'15',note:'Unilateral',muscles:['Gluteos']},
-  {id:'l2e4',name:'Flexora Nordica',sets:'2',reps:'10-12',note:'SUPERSET com Extensao',muscles:['Posteriores']},
-  {id:'l2e5',name:'Extensao de Lombar com Peso',sets:'2',reps:'10-12',note:'SUPERSET com Nordica',muscles:['Lombar','Gluteos']},
+  {id:'l2e4',name:'Flexora Nordica',sets:'2',reps:'10-12',note:'BISERIE com Extensao',muscles:['Posteriores']},
+  {id:'l2e5',name:'Extensao de Lombar com Peso',sets:'2',reps:'10-12',note:'BISERIE com Nordica',muscles:['Lombar','Gluteos']},
   {id:'l2e6',name:'Elevacao de Panturrilha Unilateral',sets:'3',reps:'8-10',note:'Unilateral',muscles:['Panturrilha']},
   {id:'l2e7',name:'Sustentacao L-Sit com Peso',sets:'3',reps:'max hold',note:'',muscles:['Abdomen','Core','Flexores do Quadril']}
 ]},
 {id:'push2',name:'Empurrar 2',type:'push',subtitle:'Enfase em Desenvolvimento',exercises:[
   {id:'p2e1',name:'Desenvolvimento Militar',sets:'4',reps:'4',note:'80% 1RM',muscles:['Deltoides','Triceps','Core']},
   {id:'p2e2',name:'Supino Fechado',sets:'3',reps:'10',note:'Pegada fechada',muscles:['Triceps','Peito']},
-  {id:'p2e3',name:'Crossover no Cabo',sets:'3',reps:'10-12',note:'Drop set no ultimo set (-50%)',muscles:['Peito']},
+  {id:'p2e3',name:'Crossover no Cabo',sets:'3',reps:'10-12',note:'Serie descendente no ultimo set (-50%)',muscles:['Peito']},
   {id:'p2e4',name:'Triceps Testa sobre a Cabeca',sets:'3',reps:'10-12',note:'',muscles:['Triceps Cabeca Longa']},
   {id:'p2e5',name:'Elevacao Lateral 21s',sets:'3',reps:'7/7/7',note:'7 completo + 7 de cima + 7 de baixo',muscles:['Deltoides Lateral']},
   {id:'p2e6',name:'Flexao e Extensao de Pescoco',sets:'3',reps:'10-12',note:'Flexao + Extensao',muscles:['Pescoco']}
